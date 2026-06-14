@@ -1,0 +1,15 @@
+# Configuración local (credenciales)
+includes/config.php
+
+# Subidas de usuarios
+assets/img/productos/*.jpg
+assets/img/productos/*.jpeg
+assets/img/productos/*.png
+assets/img/productos/*.gif
+assets/img/productos/*.webp
+
+# Logs y temporales
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

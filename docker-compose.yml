@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    image: php:8.3-apache
+    container_name: iphix_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    command: ["bash", "-c", "a2enmod rewrite && docker-php-ext-install mysqli pdo pdo_mysql && apache2-foreground"]
+
+  db:
+    image: mariadb:11
+    container_name: iphix_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: iphix_db
+      MYSQL_USER: iphix_user
+      MYSQL_PASSWORD: iphix_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: iphix_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpass
+    depends_on:
+      - db
+
+volumes:
+  db_data:

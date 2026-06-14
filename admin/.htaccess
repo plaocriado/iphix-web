@@ -1,0 +1,7 @@
+# Admin panel — Protección adicional
+Options -Indexes
+
+# Bloquear acceso directo a includes desde el exterior
+<FilesMatch "^(header|footer)\.php$">
+    Require all denied
+</FilesMatch>
