@@ -1,151 +1,94 @@
-# iphix — Guía de Instalación
+# iphix
 
-## 📋 Requisitos
-- PHP 8.1+
-- MySQL / MariaDB 10.6+
-- Apache con mod_rewrite activo
-- (Opcional) Composer para autoloading
+Plataforma web para la gestión y venta de dispositivos electrónicos de segunda mano. Desarrollada como proyecto final del CFGM de Sistemas Microinformáticos y Redes.
 
----
+## Tecnologías
 
-## 🚀 Pasos de instalación
+- PHP 8.3 + PDO
+- MariaDB / MySQL
+- Apache con mod_rewrite y SSL
+- Bootstrap 5 + Chart.js
+- Stripe API (pagos)
 
-### 1. Subir los archivos
-Sube todos los archivos a tu servidor web (p.ej. `/var/www/html/iphix/` o raíz del dominio).
+## Requisitos del servidor
 
-### 2. Importar la base de datos
+- Ubuntu Server 24.04 LTS (o similar)
+- Apache 2.4 con mod_rewrite y mod_ssl
+- PHP 8.3 con extensiones: pdo_mysql, mbstring, gd, curl, zip
+- MariaDB 10.6 o superior
+
+## Instalación
+
+**1. Importar la base de datos**
+
 ```bash
 mysql -u root -p < database/iphix.sql
+mysql -u root -p nombre_bd < database/tickets_schema.sql
 ```
-O desde phpMyAdmin: importa el archivo `database/iphix.sql`.
 
-### 3. Configurar la conexión
-Edita `includes/config.php`:
+**2. Configurar la conexión**
+
+Copia `includes/config.php` y edita los valores:
+
 ```php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'iphix');
-define('DB_USER', 'tu_usuario_bd');
-define('DB_PASS', 'tu_contraseña_bd');
-define('APP_URL', 'https://tudominio.com');
-define('APP_DEV_MODE', false); // false en producción
+define('DB_NAME', 'nombre_bd');
+define('DB_USER', 'usuario');
+define('DB_PASS', 'contraseña');
 ```
 
-### 4. Configurar Stripe
-En `includes/config.php`:
-```php
-define('STRIPE_PUBLIC_KEY', 'pk_live_...');
-define('STRIPE_SECRET_KEY', 'sk_live_...');
-```
+También añade tus claves de Stripe si vas a usar el módulo de pagos.
 
-### 5. Generar contraseñas reales
-Ejecuta este script PHP una sola vez para crear el admin:
+**3. Generar contraseñas de los usuarios de ejemplo**
 
 ```bash
 php database/hash_passwords.php
 ```
 
-O manualmente en tu base de datos:
-```sql
-UPDATE usuarios SET password = '$2y$12$HASH_GENERADO' WHERE email = 'admin@iphix.es';
-```
+Edita ese archivo antes de ejecutarlo para cambiar los emails y contraseñas por defecto.
 
-### 6. Permisos de carpeta de imágenes
+**4. Permisos**
+
 ```bash
-chmod 755 assets/img/productos/
-chown www-data:www-data assets/img/productos/
+chown -R www-data:www-data /var/www/iphix
+chmod -R 755 /var/www/iphix
+chmod -R 775 /var/www/iphix/assets/img/productos
 ```
 
-### 7. Verificar .htaccess
-Asegúrate de que `mod_rewrite` está activo en Apache:
-```bash
-a2enmod rewrite
-systemctl restart apache2
-```
-
----
-
-## 🔑 Acceso inicial
-
-Ejecuta `database/hash_passwords.php` para generar los usuarios de ejemplo con contraseñas cifradas.
-Edita ese archivo para establecer los emails y contraseñas que necesites antes de ejecutarlo.
-
-> ⚠️ **Cambia las contraseñas por defecto antes de usar en producción.**
-
----
-
-## 📁 Estructura del proyecto
+## Estructura
 
 ```
 iphix/
-├── index.php              # Homepage
-├── .htaccess              # Config Apache
-├── includes/
-│   ├── config.php         # ⚙️ Configuración (DB, Stripe, etc.)
-│   ├── db.php             # Conexión PDO + helpers
-│   ├── auth.php           # Auth, sesiones, carrito
-│   ├── header.php         # Cabecera HTML pública
-│   └── footer.php         # Pie de página público
-├── pages/
-│   ├── productos.php      # Catálogo con filtros
-│   ├── detalle.php        # Detalle de producto
-│   ├── login.php          # Login + Registro
-│   ├── carrito.php        # Carrito de compra
-│   ├── checkout.php       # Proceso de pago (Stripe)
-│   ├── perfil.php         # Perfil de usuario
-│   ├── buscar.php         # Buscador
-│   └── logout.php         # Cierre de sesión
-├── admin/
-│   ├── index.php          # Dashboard con KPIs y gráficas
-│   ├── productos.php      # CRUD productos
-│   ├── pedidos.php        # Gestión pedidos
-│   ├── piezas.php         # Inventario piezas
-│   ├── usuarios.php       # Gestión usuarios
-│   ├── contacto.php       # Mensajes de contacto
-│   ├── finanzas.php       # Ingresos/gastos
-│   ├── includes/
-│   │   ├── header.php     # Cabecera admin
-│   │   └── footer.php     # Pie admin
-│   └── assets/
-│       ├── css/admin.css  # Estilos panel admin
-│       └── js/admin.js    # JS panel admin
-├── api/
-│   ├── cart.php           # API carrito (AJAX)
-│   ├── payment.php        # API Stripe + pedidos
-│   └── search.php         # API búsqueda
-├── assets/
-│   ├── css/style.css      # Estilos tienda pública
-│   ├── js/main.js         # JS tienda pública
-│   └── img/productos/     # 📷 Imágenes de productos
-└── database/
-    ├── iphix.sql          # Schema + datos de ejemplo
-    └── hash_passwords.php # Script para generar hashes
+├── index.php
+├── includes/          # Configuración, BD, auth, cabecera y pie
+├── pages/             # Tienda pública (productos, carrito, checkout...)
+├── admin/             # Panel de administración
+├── api/               # Endpoints AJAX (carrito, pagos, búsqueda)
+├── assets/            # CSS, JS e imágenes
+└── database/          # SQL del esquema y script de contraseñas
 ```
 
----
+## Funcionalidades
 
-## 🛡️ Seguridad implementada
+**Tienda pública**
+- Catálogo con filtros por categoría, precio y estado del dispositivo
+- Buscador global
+- Carrito de compra y checkout con Stripe
+- Registro e inicio de sesión con historial de pedidos
+- Sistema de soporte con tickets
 
-- **CSRF tokens** en todos los formularios
-- **PDO con prepared statements** (prevención SQL Injection)
-- **password_hash/verify** con bcrypt (cost=12)
-- **Sesiones seguras** (httponly, samesite=strict)
-- **XSS prevention** con htmlspecialchars()
-- **Cabeceras HTTP** de seguridad en .htaccess
-- **Validación** de tipos, emails y datos en servidor
-- **Acceso admin** protegido por verificación de rol en cada página
+**Panel de administración**
+- Dashboard con gráficas de ventas (Chart.js)
+- Gestión de productos, pedidos y usuarios
+- Inventario de piezas con control de entradas y salidas
+- Registro de ingresos y gastos
+- Gestión de tickets de soporte
 
----
+## Seguridad
 
-## 💳 Integración Stripe
-
-El pago usa **Stripe Elements** (v3) en el frontend.
-
-**Para modo test:** usa la tarjeta `4242 4242 4242 4242` con cualquier fecha futura y CVC.
-
-**Para producción:** reemplaza las claves en `includes/config.php` por las claves `live` de tu cuenta Stripe.
-
----
-
-## 📞 Soporte
-
-Proyecto desarrollado por **Pedro Lao** — IES Inca Garcilaso
+- Contraseñas cifradas con bcrypt (password_hash, cost 12)
+- Consultas preparadas con PDO
+- Tokens CSRF en todos los formularios
+- Sesiones con flags httponly y samesite strict
+- HTTPS obligatorio (redirección desde HTTP)
+- Firewall UFW (puertos 22, 80 y 443)
